@@ -577,13 +577,13 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 							{
 								tag: buttonType,
 								attrs: getButtonArgs(message),
-								content: buttonType == 'interactive' ? [{
+								content: [{
 								    tag: 'native_flow',
 								    attrs: {
 								        name: 'quick_reply'
 								        
 								    }
-								}] : {}
+								}]
 							}
 						]
 					})
