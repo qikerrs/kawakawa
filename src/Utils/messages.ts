@@ -901,7 +901,7 @@ export const generateWAMessageContent = async(
 
 		m = { viewOnceMessage: { message } }
 	} else if('templateButtons' in message && !!message.templateButtons) {
-		/*const msg: proto.Message.TemplateMessage.IHydratedFourRowTemplate = {
+		const msg: proto.Message.TemplateMessage.IHydratedFourRowTemplate = {
 			hydratedButtons: message.templateButtons
 		}
 
@@ -920,15 +920,20 @@ export const generateWAMessageContent = async(
 			msg.hydratedFooterText = message.footer
 		}
 
-		m = {
+		const esm = {
 			templateMessage: {
 				fourRowTemplate: msg,
 				hydratedTemplate: msg
 			}
-		}*/
-		/*const msg = patchButtonsMessage(message)*/
+		}
 		
-		m = { patchButtonsMessage(message) }
+		m = {
+			viewOnceMessage: {
+				message: {
+					interactiveMessage: convertTemplateToInteractive(esm.templateMessage)
+				}
+			}
+		}
 	}
 
 	if('sections' in message && !!message.sections) {
