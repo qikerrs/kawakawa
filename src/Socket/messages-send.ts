@@ -35,7 +35,7 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 		groupToggleEphemeral,
 	} = sock
 	
-	const patchMessageRequiresBeforeSending = (msg: proto.IMessage, recipientJids: string[], currentJid?: string | null): proto.IMessage => {
+	const patchMessageRequiresBeforeSending = (msg: proto.IMessage, recipientJids?: string[], currentJid?: string | null): proto.IMessage => {
 		msg = patchButtonsMessage(msg, currentJid)
 
 		if(msg?.deviceSentMessage?.message?.listMessage) {
