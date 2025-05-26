@@ -8,7 +8,6 @@ import { aggregateMessageKeysNotFromMe, assertMediaContent, bindWaitForEvent, de
 import { getUrlInfo } from '../Utils/link-preview'
 import { areJidsSameUser, BinaryNode, BinaryNodeAttributes, getBinaryNodeChild, getBinaryNodeChildren, isJidGroup, isJidUser, jidDecode, jidEncode, jidNormalizedUser, JidWithDevice, S_WHATSAPP_NET } from '../WABinary'
 import { USyncQuery, USyncUser } from '../WAUSync'
-import { patchButtonsMessage } from '../Utils/patchButtonsMessage'
 import { makeGroupsSocket } from './groups'
 import ListType = proto.Message.ListMessage.ListType;
 
@@ -34,42 +33,6 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 		groupMetadata,
 		groupToggleEphemeral,
 	} = sock
-	
-	const patchMessageRequiresBeforeSending = (msg: proto.IMessage, recipientJids?: string[] | null, currentJid?: string | null): proto.IMessage => {
-		msg = patchButtonsMessage(msg, currentJid)
-
-		if(msg?.deviceSentMessage?.message?.listMessage) {
-			msg = JSON.parse(JSON.stringify(msg))
-			msg.deviceSentMessage!.message.listMessage.listType = proto.Message.ListMessage.ListType.SINGLE_SELECT
-		}
-
-		if(msg?.listMessage) {
-			msg = JSON.parse(JSON.stringify(msg))
-			msg.listMessage!.listType = proto.Message.ListMessage.ListType.SINGLE_SELECT
-		}
-
-		/*const requiresPatch = !!(
-			msg?.buttonsMessage ||
-			msg?.templateMessage ||
-			msg?.listMessage ||
-			msg?.interactiveMessage
-		);
-		if (requiresPatch) {
-			msg = {
-				documentWithCaptionMessage: {
-					message: {
-						messageContextInfo: {
-							deviceListMetadataVersion: 2,
-							deviceListMetadata: {},
-						},
-						...msg,
-					},
-				},
-			};
-		}*/
-
-		return msg
-	}
 
 	const userDevicesCache = config.userDevicesCache || new NodeCache({
 		stdTTL: DEFAULT_CACHE_TTLS.USER_DEVICES, // 5 minutes
@@ -318,7 +281,6 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 		message: proto.IMessage,
 		extraAttrs?: BinaryNode['attrs']
 	) => {
-	    message = patchButtonsMessage(msg, jids)
 		let patched = await patchMessageBeforeSending(message, jids)
 		if(!Array.isArray(patched)) {
 		  patched = jids ? jids.map(jid => ({ recipientJid: jid, ...patched })) : [patched]
@@ -333,8 +295,8 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 					if(!jid) {
 					  return {} as BinaryNode
 					}
-					
-					const bytes = encodeWAMessage(patched)
+
+					const bytes = encodeWAMessage(patchedMessage)
 					const { type, ciphertext } = await signalRepository
 						.encryptMessage({ jid, data: bytes })
 					if(type === 'pkmsg') {
@@ -457,7 +419,6 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 					}
 
 					const patched = await patchMessageBeforeSending(message)
-					const requiredPatched = patchMessageRequiresBeforeSending(patched, devices.map(d => jidEncode(d.user, isLid ? 'lid' : 's.whatsapp.net', d.device)), participant.jid)
 
 					if(Array.isArray(patched)) {
 					  throw new Boom('Per-jid patching is not supported in groups')
@@ -616,16 +577,13 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 							{
 								tag: buttonType,
 								attrs: getButtonArgs(message),
-								content: [
-								    {
-								        tag: 'native_flow',
-								        attrs: {
-								            name: 'quick_reply'
-								            
-								        }
+								content: buttonType == 'interactive' ? [{
+								    tag: 'native_flow',
+								    attrs: {
+								        name: 'quick_reply'
 								        
 								    }
-								]
+								}] : {}
 							}
 						]
 					})
@@ -700,8 +658,6 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 			return 'list'
 		} else if(message.listResponseMessage) {
 			return 'list_response'
-		} else if(message.templateMessage){
-		    return 'interactive'
 		} else if(message.interactiveMessage){
 		    return 'interactive'
 		}
@@ -710,10 +666,7 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 	const getButtonArgs = (message: proto.IMessage): BinaryNode['attrs'] => {
 		if(message.templateMessage) {
 			// TODO: Add attributes
-			return {
-						type: 'native_flow',
-						v: '1'
-					}
+			return {}
 		} else if(message.listMessage) {
 			const type = message.listMessage.listType
 			if(!type) {
@@ -721,7 +674,7 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 			}
 
 			return { v: '2', type: ListType[type].toLowerCase() }
-		} else if(message.interactiveMessage){
+		} else if() {
 		    return {
 						type: 'native_flow',
 						v: '1'
