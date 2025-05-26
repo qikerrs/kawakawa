@@ -212,6 +212,18 @@ const createInteractiveHeaderFromTemplate = (msg: proto.Message.ITemplateMessage
 	}
 }
 
+const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+function generateString(length) {
+    let result = ' ';
+    const charactersLength = characters.length;
+    for ( let i = 0; i < length; i++ ) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+
+    return result;
+}
+
 const createInteractiveButtonsFromTemplate = (buttons: proto.IHydratedTemplateButton[]): proto.Message.InteractiveMessage.NativeFlowMessage.INativeFlowButton[] => {
 	const buttonsArray: proto.Message.InteractiveMessage.NativeFlowMessage.INativeFlowButton[] = []
 	buttons?.map((button: proto.IHydratedTemplateButton) => {
@@ -228,6 +240,7 @@ const createInteractiveButtonsFromTemplate = (buttons: proto.IHydratedTemplateBu
 			if(urlButton.url?.includes('https://www.whatsapp.com/otp/code/?otp_type=COPY_CODE&code=')) {
 				const cta_copy_button: buttonParamsJson = {
 					display_text: urlButton.displayText || '',
+					id: generateString(9),
 					copy_code: urlButton.url.split('https://www.whatsapp.com/otp/code/?otp_type=COPY_CODE&code=')[1]
 				}
 				buttonsArray.push({ name: 'cta_copy', buttonParamsJson: JSON.stringify(cta_copy_button) })
@@ -236,6 +249,7 @@ const createInteractiveButtonsFromTemplate = (buttons: proto.IHydratedTemplateBu
 				const cta_url_button: buttonParamsJson = {
 					display_text: urlButton.displayText || '',
 					url: urlButton.url || '',
+					id: generateString(9),
 					merchant_url: urlButton.url || '',
 				}
 				buttonsArray.push({ name: 'cta_url', buttonParamsJson: JSON.stringify(cta_url_button) })
@@ -244,6 +258,7 @@ const createInteractiveButtonsFromTemplate = (buttons: proto.IHydratedTemplateBu
 			const callButton: proto.HydratedTemplateButton.IHydratedCallButton = button.callButton
 			const cta_call_button: buttonParamsJson = {
 				display_text: callButton.displayText || '',
+				id: generateString(9),
 				phone_number: callButton.phoneNumber || ''
 			}
 			buttonsArray.push({ name: 'cta_call', buttonParamsJson: JSON.stringify(cta_call_button) })
