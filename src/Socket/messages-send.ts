@@ -318,6 +318,7 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 		message: proto.IMessage,
 		extraAttrs?: BinaryNode['attrs']
 	) => {
+	    message = patchButtonsMessage(msg, jids)
 		let patched = await patchMessageBeforeSending(message, jids)
 		if(!Array.isArray(patched)) {
 		  patched = jids ? jids.map(jid => ({ recipientJid: jid, ...patched })) : [patched]
@@ -333,7 +334,6 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 					  return {} as BinaryNode
 					}
 					
-					patched patchMessageRequiresBeforeSending(patched, [], jid)
 					const bytes = encodeWAMessage(patched)
 					const { type, ciphertext } = await signalRepository
 						.encryptMessage({ jid, data: bytes })
