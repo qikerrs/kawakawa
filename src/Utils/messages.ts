@@ -506,6 +506,8 @@ export const generateWAMessageContent = async(
 		m.protocolMessage = {
 			type: proto.Message.ProtocolMessage.Type.SHARE_PHONE_NUMBER
 		}
+	} else if('interactive' in message) {
+	    
 	} else if('requestPhoneNumber' in message) {
 		m.requestPhoneNumberMessage = {}
 	} else {
@@ -538,6 +540,30 @@ export const generateWAMessageContent = async(
 		}
 
 		m = { buttonsMessage }
+	} else if('interactiveMessage' in message) {
+		if(message.interactiveMessage.header?.hasMediaAttachment) {
+			if(message.interactiveMessage.header.imageMessage) {
+				const mediaMessage = await prepareWAMessageMedia({ image: {
+					url : message.interactiveMessage.header.imageMessage.url || ''
+				} },
+				options)
+				message.interactiveMessage.header.imageMessage = mediaMessage.imageMessage
+			} else if(message.interactiveMessage.header.documentMessage) {
+				const mediaMessage = await prepareWAMessageMedia({ document: {
+					url : message.interactiveMessage.header.documentMessage.url || ''
+				}, mimetype: 'application/pdf' },
+				options)
+				message.interactiveMessage.header.documentMessage = mediaMessage.documentMessage
+			} else if(message.interactiveMessage.header.videoMessage) {
+				const mediaMessage = await prepareWAMessageMedia({ video: {
+					url : message.interactiveMessage.header.videoMessage.url || ''
+				} },
+				options)
+				message.interactiveMessage.header.videoMessage = mediaMessage.videoMessage
+			}
+		}
+
+		m = { viewOnceMessage: { message } }
 	} else if('templateButtons' in message && !!message.templateButtons) {
 		/*const msg: proto.Message.TemplateMessage.IHydratedFourRowTemplate = {
 			hydratedButtons: message.templateButtons
