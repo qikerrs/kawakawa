@@ -590,7 +590,7 @@ export const generateWAMessageContent = async(
 				hydratedTemplate: msg
 			}
 		}*/
-		msg = patchButtonsMessage(msg)
+		msg = patchButtonsMessage(message)
 		
 		m = { msg };
 	}
