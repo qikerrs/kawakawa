@@ -506,7 +506,7 @@ export const generateWAMessageContent = async(
 		m.protocolMessage = {
 			type: proto.Message.ProtocolMessage.Type.SHARE_PHONE_NUMBER
 		}
-	} else if('interactive' in message) {
+	} else if('interactiveMessage' in message) {
 	    
 	} else if('requestPhoneNumber' in message) {
 		m.requestPhoneNumberMessage = {}
