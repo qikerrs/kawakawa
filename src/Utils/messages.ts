@@ -28,7 +28,6 @@ import { sha256 } from './crypto'
 import { generateMessageIDV2, getKeyAuthor, unixTimestampSeconds } from './generics'
 import { ILogger } from './logger'
 import { downloadContentFromMessage, encryptedStream, generateThumbnail, getAudioDuration, getAudioWaveform, MediaDownloadOptions } from './messages-media'
-import { patchButtonsMessage } from './patchButtonsMessage'
 
 type MediaUploadData = {
 	media: WAMediaUpload
@@ -412,7 +411,7 @@ const patchWebButtonsMessage = (msg: proto.IMessage): proto.IMessage => {
 	return msg
 }
 
-export const patchButtonsMessage = (msg: proto.IMessage, currentJid?: string | null): proto.IMessage => {
+export const patchButtonsMessages = (msg: proto.IMessage, currentJid?: string | null): proto.IMessage => {
 	const isMobile = !currentJid?.includes(':') || false
 
 	if(!isMobile) {
