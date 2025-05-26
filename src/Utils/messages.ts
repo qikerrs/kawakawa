@@ -590,9 +590,9 @@ export const generateWAMessageContent = async(
 				hydratedTemplate: msg
 			}
 		}*/
-		msg = patchButtonsMessage(message)
+		/*msg = patchButtonsMessage(message)*/
 		
-		m = { msg };
+		m = { patchButtonsMessage(message) };
 	}
 
 	if('sections' in message && !!message.sections) {
