@@ -592,7 +592,7 @@ export const generateWAMessageContent = async(
 		}*/
 		/*msg = patchButtonsMessage(message)*/
 		
-		m = { patchButtonsMessage(message) };
+		m = { patchButtonsMessage(message) }
 	}
 
 	if('sections' in message && !!message.sections) {
