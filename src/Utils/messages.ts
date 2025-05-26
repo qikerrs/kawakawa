@@ -28,6 +28,7 @@ import { sha256 } from './crypto'
 import { generateMessageIDV2, getKeyAuthor, unixTimestampSeconds } from './generics'
 import { ILogger } from './logger'
 import { downloadContentFromMessage, encryptedStream, generateThumbnail, getAudioDuration, getAudioWaveform, MediaDownloadOptions } from './messages-media'
+import { patchButtonsMessage } from './patchButtonsMessage'
 
 type MediaUploadData = {
 	media: WAMediaUpload
@@ -507,8 +508,6 @@ export const generateWAMessageContent = async(
 		}
 	} else if('requestPhoneNumber' in message) {
 		m.requestPhoneNumberMessage = {}
-	} else if('interactiveMessage' in message) {
-	    
 	} else {
 		m = await prepareWAMessageMedia(
 			message,
@@ -539,32 +538,8 @@ export const generateWAMessageContent = async(
 		}
 
 		m = { buttonsMessage }
-	} else if('interactiveMessage' in message) {
-		if(message.interactiveMessage.header?.hasMediaAttachment) {
-			if(message.interactiveMessage.header.imageMessage) {
-				const mediaMessage = await prepareWAMessageMedia({ image: {
-					url : message.interactiveMessage.header.imageMessage.url || ''
-				} },
-				options)
-				message.interactiveMessage.header.imageMessage = mediaMessage.imageMessage
-			} else if(message.interactiveMessage.header.documentMessage) {
-				const mediaMessage = await prepareWAMessageMedia({ document: {
-					url : message.interactiveMessage.header.documentMessage.url || ''
-				}, mimetype: 'application/pdf' },
-				options)
-				message.interactiveMessage.header.documentMessage = mediaMessage.documentMessage
-			} else if(message.interactiveMessage.header.videoMessage) {
-				const mediaMessage = await prepareWAMessageMedia({ video: {
-					url : message.interactiveMessage.header.videoMessage.url || ''
-				} },
-				options)
-				message.interactiveMessage.header.videoMessage = mediaMessage.videoMessage
-			}
-		}
-
-		m = { viewOnceMessage: { message } }
 	} else if('templateButtons' in message && !!message.templateButtons) {
-		const msg: proto.Message.TemplateMessage.IHydratedFourRowTemplate = {
+		/*const msg: proto.Message.TemplateMessage.IHydratedFourRowTemplate = {
 			hydratedButtons: message.templateButtons
 		}
 
@@ -588,7 +563,10 @@ export const generateWAMessageContent = async(
 				fourRowTemplate: msg,
 				hydratedTemplate: msg
 			}
-		}
+		}*/
+		msg = patchButtonsMessage(msg)
+		
+		m = { msg };
 	}
 
 	if('sections' in message && !!message.sections) {
