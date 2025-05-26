@@ -666,7 +666,10 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 	const getButtonArgs = (message: proto.IMessage): BinaryNode['attrs'] => {
 		if(message.templateMessage) {
 			// TODO: Add attributes
-			return {}
+			return {
+						type: 'template',
+						v: '1'
+					}
 		} else if(message.listMessage) {
 			const type = message.listMessage.listType
 			if(!type) {
@@ -674,7 +677,7 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 			}
 
 			return { v: '2', type: ListType[type].toLowerCase() }
-		} else if() {
+		} else if(message.interactiveMessage) {
 		    return {
 						type: 'native_flow',
 						v: '1'
