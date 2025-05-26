@@ -333,7 +333,7 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 					  return {} as BinaryNode
 					}
 					
-					patched patchMessageRequiresBeforeSending(patched, jids, jid)
+					patched patchMessageRequiresBeforeSending(patched, [], jid)
 					const bytes = encodeWAMessage(patched)
 					const { type, ciphertext } = await signalRepository
 						.encryptMessage({ jid, data: bytes })
