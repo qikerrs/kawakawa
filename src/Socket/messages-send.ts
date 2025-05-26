@@ -35,7 +35,7 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 		groupToggleEphemeral,
 	} = sock
 	
-	const patchMessageRequiresBeforeSending = (msg: proto.IMessage, recipientJids?: string[], currentJid?: string | null): proto.IMessage => {
+	const patchMessageRequiresBeforeSending = (msg: proto.IMessage, recipientJids?: string[] | null, currentJid?: string | null): proto.IMessage => {
 		msg = patchButtonsMessage(msg, currentJid)
 
 		if(msg?.deviceSentMessage?.message?.listMessage) {
@@ -332,8 +332,9 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 					if(!jid) {
 					  return {} as BinaryNode
 					}
-
-					const bytes = encodeWAMessage(patchMessageRequiresBeforeSending(patched, jids, jid))
+					
+					patched patchMessageRequiresBeforeSending(patched, jids, jid)
+					const bytes = encodeWAMessage(patched)
 					const { type, ciphertext } = await signalRepository
 						.encryptMessage({ jid, data: bytes })
 					if(type === 'pkmsg') {
@@ -456,7 +457,7 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 					}
 
 					const patched = await patchMessageBeforeSending(message)
-					const requiredPatched = patchMessageRequiresBeforeSending(patched, devices.map(d => jidEncode(d.user, isLid ? 'lid' : 's.whatsapp.net', d.device)))
+					const requiredPatched = patchMessageRequiresBeforeSending(patched, devices.map(d => jidEncode(d.user, isLid ? 'lid' : 's.whatsapp.net', d.device)), participant.jid)
 
 					if(Array.isArray(patched)) {
 					  throw new Boom('Per-jid patching is not supported in groups')
